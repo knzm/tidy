@@ -47,3 +47,24 @@ func TestSample(t *testing.T) {
 		t.Log(dmp.DiffPrettyText(diffs))
 	}
 }
+
+func TestTidy(t *testing.T) {
+	testData := []struct {
+		input    int
+		expected int
+	}{
+		{132, 129},
+		{1000, 999},
+		{7, 7},
+		{111111111111111110, 99999999999999999},
+		{692, 688},
+		{342, 333},
+	}
+
+	for _, tt := range testData {
+		output := tidy.Solve(tidy.Number(tt.input))
+		if int(output) != tt.expected {
+			t.Errorf("Expected %d, got %d", tt.expected, output)
+		}
+	}
+}
