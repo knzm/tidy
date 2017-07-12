@@ -8,22 +8,24 @@ import (
 	"github.com/sergi/go-diff/diffmatchpatch"
 
 	"github.com/knzm/tidy"
+	"github.com/knzm/tidy/sample"
 )
 
-var SampleInput = `
-4
-132
-1000
-7
-111111111111111110
-`[1:]
+//go:generate go-bindata -pkg sample -o sample/bindata.go sample/
 
-var SampleOutput = `
-Case #1: 129
-Case #2: 999
-Case #3: 7
-Case #4: 99999999999999999
-`[1:]
+var (
+	SampleInput  = string(sample.MustAsset("sample/input.txt"))
+	SampleOutput = string(sample.MustAsset("sample/output.txt"))
+)
+
+func IsDiffsEmpty(diffs []diffmatchpatch.Diff) bool {
+	for _, diff := range diffs {
+		if diff.Type != diffmatchpatch.DiffEqual {
+			return false
+		}
+	}
+	return true
+}
 
 func TestSample(t *testing.T) {
 	r := strings.NewReader(SampleInput)
@@ -40,7 +42,7 @@ func TestSample(t *testing.T) {
 
 	dmp := diffmatchpatch.New()
 	diffs := dmp.DiffMain(buf.String(), SampleOutput, false)
-	if len(diffs) > 0 {
+	if !IsDiffsEmpty(diffs) {
 		t.Error("The expected and actual data did not match.")
 		t.Log(dmp.DiffPrettyText(diffs))
 	}
